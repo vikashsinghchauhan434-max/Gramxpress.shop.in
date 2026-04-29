@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css'
 
 // ── Constants ──────────────────────────────────────────────────────────
-const API = '';   // same-origin proxy; set to your backend URL if deploying separately
+const API = 'https://gramexpress-shop-in.onrender.com';   // same-origin proxy; set to your backend URL if deploying separately
 const CATEGORIES = {
   Vegetables: { icon: '🥬', subcategories: ['Leafy Greens','Root Vegetables','Tomatoes & Peppers','Onion & Garlic','Gourds','Beans & Peas','Exotic Vegetables'] },
   Fruits:     { icon: '🍎', subcategories: ['Citrus Fruits','Tropical Fruits','Berries','Apples & Pears','Melons','Dry Fruits','Seasonal Fruits'] },
