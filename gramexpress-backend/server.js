@@ -143,7 +143,7 @@ app.use(express.json({ limit: '20mb' }));
 app.use('/uploads', express.static(UPLOADS_DIR));
 const PUBLIC_DIR = path.join(__dirname, 'public');
 app.use(express.static(PUBLIC_DIR));
-app.get('/', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
+app.get('/', (_req, res) => res.json({ status: 'ok', message: 'GramExpress API Running!' }));
 
 // ── Settings helpers ──────────────────────────────────────────
 async function getSettingVal(key) {
