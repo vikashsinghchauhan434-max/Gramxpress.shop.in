@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+buildCommand = "cd frontend/becho && npm install && npm run build && cd ../../gramexpress-backend && npm install"
+
+[deploy]
+startCommand = "node gramexpress-backend/server.js"
+restartPolicyType = "on_failure"
