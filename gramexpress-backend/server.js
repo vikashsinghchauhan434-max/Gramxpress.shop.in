@@ -74,7 +74,6 @@ const OrderSchema = new mongoose.Schema({
   _id:             { type: String, default: () => 'ORD' + String(Date.now()).slice(-6) + Math.random().toString(36).slice(2,5).toUpperCase() },
   customerId:      String,
   customerName:    String,
-  // ✅ FIXED: customerPhone properly saved
   customerPhone:   { type: String, default: '' },
   customerAddress: String,
   vendorId:        String,
@@ -119,10 +118,9 @@ const upload = multer({ storage, limits: { fileSize: 5*1024*1024 }, fileFilter: 
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '20mb' }));
 app.use('/uploads', express.static(UPLOADS_DIR));
-const PUBLIC_DIR = path.join(__dirname, 'public');
-app.use(express.static(PUBLIC_DIR));
 
-// Serve React frontend build
+// ✅ FIXED: Removed public dir static serving (not needed for API-only backend)
+// Serve React frontend build only if it exists
 const FRONTEND_DIST = path.join(__dirname, '../frontend/becho/dist');
 if (require('fs').existsSync(FRONTEND_DIST)) {
   app.use(express.static(FRONTEND_DIST));
@@ -132,7 +130,9 @@ if (require('fs').existsSync(FRONTEND_DIST)) {
     }
   });
 }
-app.get('/', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
+
+// ✅ FIXED: Root route now returns JSON instead of looking for missing index.html
+app.get('/', (_req, res) => res.json({ status: 'ok', message: 'GramExpress API Running! 🌿' }));
 
 async function getSettingVal(key) { const row = await Setting.findOne({ key }); return row ? row.value : null; }
 async function setSettingVal(key, val) { await Setting.findOneAndUpdate({ key }, { value: val }, { upsert: true }); }
@@ -323,7 +323,7 @@ app.delete('/api/products/:id', authMiddleware, requireRole('vendor','admin'), a
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── ORDERS — ✅ FIXED: phone properly saved ───────────────────
+// ── ORDERS ────────────────────────────────────────────────────
 app.post('/api/orders', authMiddleware, requireRole('customer','admin'), async (req, res) => {
   try {
     const { items, address, deliveryType, couponCode, phone } = req.body;
@@ -336,7 +336,6 @@ app.post('/api/orders', authMiddleware, requireRole('customer','admin'), async (
       getSettingVal('coupons'),
     ]);
 
-    // ✅ Save phone + address to customer profile
     await User.findByIdAndUpdate(req.user.id, { address, phone });
 
     const groups = {};
@@ -371,7 +370,7 @@ app.post('/api/orders', authMiddleware, requireRole('customer','admin'), async (
       const order = await Order.create({
         customerId:      req.user.id,
         customerName:    customer.name,
-        customerPhone:   phone,          // ✅ phone from request body
+        customerPhone:   phone,
         customerAddress: address,
         vendorId,
         vendorName:      vendor?.storeName || vendor?.name || 'Vendor',
